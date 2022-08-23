@@ -12,7 +12,7 @@ COPY ./config.py /basket/config.py
 
 COPY ./setup.py /basket/setup.py
 
-COPY ./app /basket/app
+COPY ./source /basket/app
 
 RUN pip install -e /basket/.
 
