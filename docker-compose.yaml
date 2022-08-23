@@ -25,7 +25,6 @@ services:
         ports:
             - "8889:8081"
         restart: always
-
     api:
         build: .
         environment:
