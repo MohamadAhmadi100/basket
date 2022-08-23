@@ -12,8 +12,8 @@ COPY ./config.py /basket/config.py
 
 COPY ./setup.py /basket/setup.py
 
-COPY ./source /basket/app
+COPY ./source /basket/source
 
 RUN pip install -e /basket/.
 
-CMD ["python", "/basket/app/main.py"]
+CMD ["python", "/basket/source/main.py"]
