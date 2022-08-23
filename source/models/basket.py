@@ -57,4 +57,6 @@ class Basket:
         }
         with MongoConnection() as mongo:
             result: object = mongo.basket.insert_one(basket_data)
-        return bool(result.acknowledged)
+            if result.acknowledged:
+                return self.basket_id
+        return False
