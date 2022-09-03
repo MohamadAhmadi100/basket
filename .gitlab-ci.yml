@@ -24,7 +24,7 @@ build:
     - echo RABBIT_HOST=$RABBIT_HOST >> .env
     - echo RABBIT_PORT=$RABBIT_PORT >> .env
     - echo RABBIT_USER=$RABBIT_USER >> .env
-    - echo RABBIT_PASS=$RABBIT_PASS >> .env
+    - echo RABBIT_PASSWORD=$RABBIT_PASSWORD >> .env
 #    - docker login nexus.aasood.com -u registry -p $REGPASS 
     - docker build -t basket:0.0.1 .
 
@@ -44,7 +44,7 @@ dev_deploy:
     - echo RABBIT_HOST=$RABBIT_HOST >> .env
     - echo RABBIT_PORT=$RABBIT_PORT >> .env
     - echo RABBIT_USER=$RABBIT_USER >> .env
-    - echo RABBIT_PASS=$RABBIT_PASS >> .env
+    - echo RABBIT_PASSWORD=$RABBIT_PASSWORD >> .env
 #    - docker login nexus.aasood.com -u registry -p $REGPASS
     - docker-compose -f docker-compose.yaml up -d --build
 
@@ -63,7 +63,7 @@ push:
     - echo RABBIT_HOST="172.16.16.16" >> .env
     - echo RABBIT_PORT=$RABBIT_PORT >> .env
     - echo RABBIT_USER=$RABBIT_USER >> .env
-    - echo RABBIT_PASS=$RABBIT_PASS >> .env
+    - echo RABBIT_PASSWORD=$RABBIT_PASSWORD >> .env
 #    - docker login nexus.aasood.com -u registry -p $REGPASS
     - docker build -t basket:0.0.1 . #-t nexus.aasood.com/backend/basket:$CI_COMMIT_SHORT_SHA
 #    - docker push nexus.aasood.com/backend/basket:$CI_COMMIT_SHORT_SHA
@@ -83,6 +83,6 @@ master_deploy:
     - echo RABBIT_HOST="172.16.16.16" >> .env
     - echo RABBIT_PORT=$RABBIT_PORT >> .env
     - echo RABBIT_USER=$RABBIT_USER >> .env
-    - echo RABBIT_PASS=$RABBIT_PASS >> .env
+    - echo RABBIT_PASSWORD=$RABBIT_PASSWORD >> .env
 #    - docker login nexus.aasood.com -u registry -p $REGPASS
     - docker-compose -f docker-compose.yaml up -d --build
