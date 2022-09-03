@@ -18,7 +18,7 @@ class Config:
     RABBIT_HOST: str = os.getenv("RABBIT_HOST")
     RABBIT_PORT: str = int(os.getenv("RABBIT_PORT"))
     RABBIT_USER: str = os.getenv("RABBIT_USER")
-    RABBIT_PASS: str = os.getenv("RABBIT_PASSWORD")
+    RABBIT_PASSWORD: str = os.getenv("RABBIT_PASSWORD")
 
 
 config = Config()
