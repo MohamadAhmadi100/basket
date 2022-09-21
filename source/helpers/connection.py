@@ -32,9 +32,9 @@ class MongoConnection:
 
     @property
     def log(self):
-        return self.__db_name["basket"].log
+        return self.__db_name["log"]
 
     @property
     def counter(self):
-        return self.__db_name["db-basket"].counter
+        return self.__db_name["counter"]
 
