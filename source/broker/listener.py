@@ -3,6 +3,7 @@ from config import config
 
 # Important imports dont remove
 from source.controllers.router_back_office import *
+from source.controllers.router_basket import *
 
 response = {}
 app_name = config.APP_NAME

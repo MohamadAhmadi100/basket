@@ -88,24 +88,63 @@ class Basket:
         with MongoConnection() as mongo:
             return list(mongo.basket.find(query_operator)) or False
 
-    def add_product_to_basket(self, system_code: str, product_type: str, quantity: int, price: int):
+    def check_storage(self, storage_id: str):
         query_operator = {"basketId": self.basket_id}
-        push_operator = {
-            "$push":
-                {
-                    f"{product_type}Products":
-                        {
-                            "systemCode": system_code,
-                            "quantity": quantity,
-                            "basketPrice": price
-                        }
-                }
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            result = mongo.basket.find_one(query_operator, projection_operator)
+            if result.get("storageId") == storage_id:
+                return True
+        return False
+
+    def set_selective_quantity(self, min_quantity: int, max_quantity: int):
+        query_operator = {"basketId": self.basket_id}
+        modify_operator = {
+            "$set": {
+                "minSelectiveProductsQuantity": min_quantity,
+                "maxSelectiveProductsQuantity": max_quantity,
+            }
         }
         with MongoConnection() as mongo:
+            if result := mongo.basket.update_one(
+                    query_operator,
+                    modify_operator,
+            ):
+                return bool(result.acknowledged)
+        return
+
+    def add_product_to_basket(self, system_code: str, product_type: str, quantity: int, min_quantity: int,
+                              max_quantity: int, price: int):
+
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            basket = mongo.basket.find_one(query_operator, projection_operator)
+            if product_type == "mandatory":
+                body = {
+                    "systemCode": system_code,
+                    "quantity": quantity,
+                    "basketPrice": price,
+                    "storageId": basket.get("storageId"),
+                }
+            else:
+                body = {
+                    "systemCode": system_code,
+                    "minQuantity": min_quantity,
+                    "maxQuantity": max_quantity,
+                    "basketPrice": price,
+                    "storageId": basket.get("storageId"),
+                }
+            push_operator = {
+                "$push":
+                    {
+                        f"{product_type}Products": body
+                    }
+            }
             result = mongo.basket.update_one(query_operator, push_operator, upsert=True)
         return bool(result.acknowledged)
 
-    def edit_product(self, system_code: str, quantity: int, price: int):
+    def edit_product(self, system_code: str, quantity: int, price: int, min_quantity: int, max_quantity: int):
         query_operator = {"basketId": self.basket_id}
         projection_operator = {"_id": 0}
         product_type: str = ""
@@ -124,6 +163,8 @@ class Basket:
             modify_operator = {
                 "$set": {
                     f"{product_type}.$[elem].quantity": quantity,
+                    f"{product_type}.$[elem].minQuantity": min_quantity,
+                    f"{product_type}.$[elem].maxQuantity": max_quantity,
                     f"{product_type}.$[elem].basketPrice": price
                 }
             }
@@ -163,8 +204,24 @@ class Basket:
                 return bool(result.acknowledged)
         return
 
+    def is_valid_basket(self, basket_end_date):
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            try:
+                result = mongo.basket.find_one(query_operator, projection_operator)
+                if result.get("basketStatus") not in ["pend", "complete", "active"] or not len(
+                        result.get("mandatoryProducts")) or not len(
+                    result.get("selectiveProducts")) or basket_end_date < jalali_datetime(
+                    datetime.now()) or not result.get("minSelectiveProductsQuantity") or not result.get(
+                    "maxSelectiveProductsQuantity"):
+                    return False
+                return True
+            except Exception:
+                return False
+
     def complete(self, basket_start_date: str, basket_end_date: str, sales_per_day: int, sales_number: int,
-                 basket_status: int):
+                 basket_status: str):
         query_operator = {"basketId": self.basket_id}
         modify_operator = {
             "$set": {
@@ -199,3 +256,68 @@ class Basket:
             ):
                 return bool(result.acknowledged)
         return
+
+    def get_basket(self):
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            try:
+                return mongo.basket.find_one(query_operator, projection_operator)
+            except Exception:
+                return False
+
+    def is_salable_basket(self):
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            try:
+                result = mongo.basket.find_one(query_operator, projection_operator)
+                if result.get("basketStatus") != "active" or not len(result.get("mandatoryProducts")) or not len(
+                        result.get("selectiveProducts")) or result.get("basketJalaliEndDate") < jalali_datetime(
+                    datetime.now()) or not result.get("minSelectiveProductsQuantity") or not result.get(
+                    "maxSelectiveProductsQuantity"):
+                    return False
+                return True
+            except Exception:
+                return False
+
+    def check_products(self, cus_mandatory_products: list, cus_selective_products: list, cus_optional_products: list):
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            try:
+                result = mongo.basket.find_one(query_operator, projection_operator)
+            except Exception:
+                return False
+        if len(result.get("mandatoryProducts")) != len(cus_mandatory_products):
+            return False
+        if len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
+                cus_selective_products) > result.get("maxSelectiveProductsQuantity"):
+            return False
+        for mandatory_product in result.get("mandatoryProducts"):
+            for cus_mandatory_product in cus_mandatory_products:
+                if mandatory_product.get("systemCode") == cus_mandatory_product.get("systemCode"):
+                    if mandatory_product.get("quantity") != cus_mandatory_product.get("quantity"):
+                        return False
+                    cus_mandatory_product["basketPrice"] = mandatory_product.get("basketPrice")
+        for cus_selective_product in cus_selective_products:
+            for selective_product in result.get("selectiveProducts"):
+                if selective_product.get("systemCode") == cus_selective_product.get("systemCode"):
+                    if (cus_selective_product.get("quantity") < selective_product.get(
+                            "minQuantity") or cus_selective_product.get("quantity") > selective_product.get(
+                        "maxQuantity")):
+                        return False
+                    cus_selective_product["basketPrice"] = selective_product.get("basketPrice")
+        for cus_optional_product in cus_optional_products:
+            for optional_product in result.get("optionalProducts"):
+                if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
+                    if (cus_optional_product.get("quantity") < optional_product.get(
+                            "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
+                        "maxQuantity")):
+                        return False
+                    cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
+        return {"basketId": result.get("basketId"), "mandatoryProducts": cus_mandatory_products,
+                "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
+                "basketSalesNumber": result.get("basketSalesNumber"),
+                "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
+                "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity")}
