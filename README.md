@@ -5,7 +5,7 @@
   <a href="https://aasood.com">
     <img src="https://aasood.com/media/logo/stores/1/file.png" alt="Logo" width="107" height="47">
   </a>
- 
+
 <h3 align="center">Basket Microservice</h3>
 
   <p align="center">
@@ -21,7 +21,6 @@
     <a href="https://gitlab.aasood.com/ecommerce/backend/basket/-/issues">Request Feature</a>
   </p>
 </div>
-
 
 
 <!-- TABLE OF CONTENTS -->
