@@ -301,22 +301,39 @@ class Basket:
                         return False
                     cus_mandatory_product["basketPrice"] = mandatory_product.get("basketPrice")
         for cus_selective_product in cus_selective_products:
+            flag = False
             for selective_product in result.get("selectiveProducts"):
                 if selective_product.get("systemCode") == cus_selective_product.get("systemCode"):
+                    flag = True
                     if (cus_selective_product.get("quantity") < selective_product.get(
                             "minQuantity") or cus_selective_product.get("quantity") > selective_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         return False
                     cus_selective_product["basketPrice"] = selective_product.get("basketPrice")
+            if not flag:
+                return False
+            else:
+                continue
+        if not cus_optional_products:
+            return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
+                    "selectiveProducts": cus_selective_products,"basketSalesNumber": result.get("basketSalesNumber"),
+                    "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
+                    "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity")}
         for cus_optional_product in cus_optional_products:
+            flag = False
             for optional_product in result.get("optionalProducts"):
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
+                    flag = True
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
                         "maxQuantity")):
                         return False
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
-        return {"basketId": result.get("basketId"), "mandatoryProducts": cus_mandatory_products,
+            if not flag:
+                return False
+            else:
+                continue
+        return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                 "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
                 "basketSalesNumber": result.get("basketSalesNumber"),
                 "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),

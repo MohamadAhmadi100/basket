@@ -42,5 +42,6 @@ def check_basket_is_valid(data: str):
     if result := basket.check_products(cus_mandatory_products=data.get("mandatory_products"),
                                        cus_selective_products=data.get("selective_products"),
                                        cus_optional_products=data.get("optional_products")):
+        result["action"] = data.get("action", "add")
         return {"success": True, "data": result, "status_code": 200}
     return {"success": False, "error": "سبد مورد نظر موجود نیست ..", "status_code": 404}
