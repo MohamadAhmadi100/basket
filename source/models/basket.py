@@ -44,9 +44,7 @@ class Basket:
         with MongoConnection() as mongo:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
-                if not result or result.get("basketStatus") == "archive":
-                    return False
-                return True
+                return bool(result and result.get("basketStatus") != "archive")
             except Exception:
                 return False
 
@@ -210,13 +208,12 @@ class Basket:
         with MongoConnection() as mongo:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
-                if result.get("basketStatus") not in ["pend", "complete", "active"] or not len(
-                        result.get("mandatoryProducts")) or not len(
-                    result.get("selectiveProducts")) or basket_end_date < jalali_datetime(
-                    datetime.now()) or not result.get("minSelectiveProductsQuantity") or not result.get(
-                    "maxSelectiveProductsQuantity"):
-                    return False
-                return True
+                return bool(result.get("basketStatus") in ["pend", "complete", "active"] and len(
+                    result.get("mandatoryProducts")) and len(
+                    result.get("selectiveProducts")) and basket_end_date >= jalali_datetime(
+                    datetime.now()) and result.get("minSelectiveProductsQuantity") and result.get(
+                    "maxSelectiveProductsQuantity"))
+
             except Exception:
                 return False
 
@@ -324,7 +321,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
