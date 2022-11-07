@@ -272,12 +272,11 @@ class Basket:
         with MongoConnection() as mongo:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
-                if result.get("basketStatus") != "active" or not len(result.get("mandatoryProducts")) or not len(
-                        result.get("selectiveProducts")) or result.get("basketJalaliEndDate") < jalali_datetime(
-                    datetime.now()) or not result.get("minSelectiveProductsQuantity") or not result.get(
-                    "maxSelectiveProductsQuantity"):
-                    return False
-                return True
+                return bool(result.get("basketStatus") == "active" and len(result.get("mandatoryProducts")) and len(
+                    result.get("selectiveProducts")) and result.get("basketJalaliEndDate") >= jalali_datetime(
+                    datetime.now()) and result.get("minSelectiveProductsQuantity") and result.get(
+                    "maxSelectiveProductsQuantity"))
+
             except Exception:
                 return False
 
@@ -307,7 +306,7 @@ class Basket:
                     flag = True
                     if (cus_selective_product.get("quantity") < selective_product.get(
                             "minQuantity") or cus_selective_product.get("quantity") > selective_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         return False
                     cus_selective_product["basketPrice"] = selective_product.get("basketPrice")
             if not flag:
@@ -316,25 +315,84 @@ class Basket:
                 continue
         if not cus_optional_products:
             return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
-                    "selectiveProducts": cus_selective_products,"basketSalesNumber": result.get("basketSalesNumber"),
+                    "selectiveProducts": cus_selective_products, "basketSalesNumber": result.get("basketSalesNumber"),
                     "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
                     "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity")}
+        removed = []
         for cus_optional_product in cus_optional_products:
-            flag = False
             for optional_product in result.get("optionalProducts"):
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
-                    flag = True
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
                         "maxQuantity")):
-                        return False
+                        removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
-            if not flag:
-                return False
-            else:
-                continue
+        if len(removed):
+            return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
+                    "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
+                    "basketSalesNumber": result.get("basketSalesNumber"),
+                    "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
+                    "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"), "removed": removed}
         return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                 "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
                 "basketSalesNumber": result.get("basketSalesNumber"),
                 "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
                 "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity")}
+
+    def checkout_products(self, cus_mandatory_products: list, cus_selective_products: list,
+                          cus_optional_products: list):
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            try:
+                result = mongo.basket.find_one(query_operator, projection_operator)
+            except Exception:
+                return False
+        if len(result.get("mandatoryProducts")) != len(cus_mandatory_products):
+            return False
+        if len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
+                cus_selective_products) > result.get("maxSelectiveProductsQuantity"):
+            return False
+        for mandatory_product in result.get("mandatoryProducts"):
+            for cus_mandatory_product in cus_mandatory_products:
+                if mandatory_product.get("systemCode") == cus_mandatory_product.get("system_code"):
+                    if mandatory_product.get("quantity") != cus_mandatory_product.get("count"):
+                        return False
+                    cus_mandatory_product["price"] = mandatory_product.get("basketPrice")
+        for cus_selective_product in cus_selective_products:
+            flag = False
+            for selective_product in result.get("selectiveProducts"):
+                if selective_product.get("systemCode") == cus_selective_product.get("system_code"):
+                    flag = True
+                    if (cus_selective_product.get("count") < selective_product.get(
+                            "minQuantity") or cus_selective_product.get("count") > selective_product.get(
+                            "maxQuantity")):
+                        return False
+                    cus_selective_product["price"] = selective_product.get("basketPrice")
+            if not flag:
+                return False
+            else:
+                continue
+        if not cus_optional_products:
+            return {"mandatory_products": cus_mandatory_products, "selective_products": cus_selective_products,
+                    "optional_products": []}
+        new_optional_products = []
+        removed = []
+        flag = True
+        for cus_optional_product in cus_optional_products:
+            for optional_product in result.get("optionalProducts"):
+                if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
+                    if (cus_optional_product.get("quantity") < optional_product.get(
+                            "minQuantity") or cus_optional_product.get("count") > optional_product.get(
+                            "maxQuantity")):
+                        removed.append(cus_optional_product)
+                        flag = False
+                    cus_optional_product["price"] = optional_product.get("basketPrice")
+                if not flag:
+                    continue
+                new_optional_products.append(cus_optional_product)
+        if len(removed):
+            return {"mandatory_products": cus_mandatory_products, "selective_products": cus_selective_products,
+                    "optional_products": new_optional_products, "removed": removed}
+        return {"mandatory_products": cus_mandatory_products, "selective_products": cus_selective_products,
+                "optional_products": new_optional_products}

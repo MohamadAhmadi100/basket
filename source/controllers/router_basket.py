@@ -45,3 +45,44 @@ def check_basket_is_valid(data: str):
         result["action"] = data.get("action", "add")
         return {"success": True, "data": result, "status_code": 200}
     return {"success": False, "error": "سبد مورد نظر موجود نیست ..", "status_code": 404}
+
+
+def checkout_check_basket(baskets: dict):
+    response = {}
+    for basket_id, cus_baskets in baskets.items():
+        try:
+            basket_id = int(basket_id)
+        except Exception:
+            return {"success": False, "error": "سبد مورد نظر موجود نیست ...", "status_code": 404}
+        if type(response.get(f"{basket_id}")) != list:
+            response[f"{basket_id}"] = []
+        if type(cus_baskets) == list:
+            for cus_basket in cus_baskets:
+                basket = Basket(basket_id=basket_id)
+                if not basket.is_salable_basket():
+                    continue
+                if result := basket.checkout_products(cus_mandatory_products=cus_basket.get("mandatory_products"),
+                                                      cus_selective_products=cus_basket.get("selective_products"),
+                                                      cus_optional_products=cus_basket.get("optional_products")):
+                    if result.get("removed") and len(result.get("removed")):
+                        removed = result.get("removed")
+                        removed_items = [f'{item.get("name")} از سبد خرید به دلیل عدم تطبیق آدرس با انبار انتخاب شده حذف شد' for item in removed]
+                        del result["removed"]
+                        response[f"{basket_id}"].append(
+                            {"data": result,
+                             "name": [removed],
+                             "status": "removed",
+                             "message": removed_items
+                             })
+                    else:
+                        response[f"{basket_id}"].append({"data": result,
+                                                         "status": "ok"
+                                                         })
+                else:
+                    response[f"{basket_id}"].append({
+                        "status": "failed",
+                        "message": f"سبد با شناسه {basket_id} به دلیل اتمام موجودی حذف شد"
+                    })
+    if response:
+        return {"success": True, "message": response, "status_code": 200}
+    return {"success": False, "error": "سبد مورد نظر موجود نیست ..", "status_code": 404}
