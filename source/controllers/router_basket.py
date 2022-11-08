@@ -61,12 +61,18 @@ def checkout_check_basket(baskets: dict):
                 basket = Basket(basket_id=basket_id)
                 if not basket.is_salable_basket():
                     continue
-                if result := basket.checkout_products(cus_mandatory_products=cus_basket.get("mandatory_products"),
-                                                      cus_selective_products=cus_basket.get("selective_products"),
-                                                      cus_optional_products=cus_basket.get("optional_products")):
+                if result := basket.checkout_products(
+                        cus_mandatory_products=cus_basket.get("mandatory_products") or cus_basket.get(
+                                "mandatoryProducts"),
+                        cus_selective_products=cus_basket.get("selective_products") or cus_basket.get(
+                            "mandatoryProducts"),
+                        cus_optional_products=cus_basket.get("optional_products") or cus_basket.get(
+                            "mandatoryProducts")):
                     if result.get("removed") and len(result.get("removed")):
                         removed = result.get("removed")
-                        removed_items = [f'{item.get("name")} از سبد خرید به دلیل عدم تطبیق آدرس با انبار انتخاب شده حذف شد' for item in removed]
+                        removed_items = [
+                            f'{item.get("name")} از سبد خرید به دلیل عدم تطبیق آدرس با انبار انتخاب شده حذف شد' for item
+                            in removed]
                         del result["removed"]
                         response[f"{basket_id}"].append(
                             {"data": result,
