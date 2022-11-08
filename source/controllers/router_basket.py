@@ -76,7 +76,7 @@ def checkout_check_basket(baskets: dict):
                             in removed]
                         del result["removed"]
                         failed_response.append(
-                            {"data": result,
+                            {
                              "status": "removed",
                              "message": removed_items
                              })
@@ -84,7 +84,6 @@ def checkout_check_basket(baskets: dict):
                 else:
                     failed_response.append({
                         "status": "failed",
-                        "data": [],
                         "message": f"سبد با شناسه {basket_id} به دلیل اتمام موجودی حذف شد"
                     })
     if success_response:
