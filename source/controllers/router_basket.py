@@ -74,15 +74,18 @@ def checkout_check_basket(baskets: dict):
                         removed_items = [
                             f'{item.get("name")} از سبد خرید به دلیل عدم تطبیق آدرس با انبار انتخاب شده حذف شد' for item
                             in removed]
+                        removed_names = [f'{item.get("name")}' for item in removed]
                         del result["removed"]
                         failed_response.append(
                             {
-                             "status": "removed",
-                             "message": removed_items
-                             })
+                                "name": removed_names,
+                                "status": "removed",
+                                "message": removed_items
+                            })
                     success_response[f"{basket_id}"].append(result)
                 else:
                     failed_response.append({
+                        "name": str(basket_id),
                         "status": "failed",
                         "message": f"سبد با شناسه {basket_id} به دلیل اتمام موجودی حذف شد"
                     })

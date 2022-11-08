@@ -1,7 +1,6 @@
 from source.modules import terminal_log
 from config import config
 
-# Important imports dont remove
 from source.controllers.router_back_office import *
 from source.controllers.router_basket import *
 
