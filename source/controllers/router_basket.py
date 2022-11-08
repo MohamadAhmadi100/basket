@@ -65,9 +65,9 @@ def checkout_check_basket(baskets: dict):
                         cus_mandatory_products=cus_basket.get("mandatory_products") or cus_basket.get(
                                 "mandatoryProducts"),
                         cus_selective_products=cus_basket.get("selective_products") or cus_basket.get(
-                            "mandatoryProducts"),
+                            "selectiveProducts"),
                         cus_optional_products=cus_basket.get("optional_products") or cus_basket.get(
-                            "mandatoryProducts")):
+                            "optionalProducts")):
                     if result.get("removed") and len(result.get("removed")):
                         removed = result.get("removed")
                         removed_items = [
@@ -87,6 +87,7 @@ def checkout_check_basket(baskets: dict):
                 else:
                     response[f"{basket_id}"].append({
                         "status": "failed",
+                        "data": [],
                         "message": f"سبد با شناسه {basket_id} به دلیل اتمام موجودی حذف شد"
                     })
     if response:

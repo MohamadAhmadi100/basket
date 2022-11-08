@@ -352,14 +352,14 @@ class Basket:
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
-                if mandatory_product.get("systemCode") == cus_mandatory_product.get("system_code"):
+                if mandatory_product.get("systemCode") == cus_mandatory_product.get("systemCode"):
                     if mandatory_product.get("quantity") != cus_mandatory_product.get("count"):
                         return False
                     cus_mandatory_product["price"] = mandatory_product.get("basketPrice")
         for cus_selective_product in cus_selective_products:
             flag = False
             for selective_product in result.get("selectiveProducts"):
-                if selective_product.get("systemCode") == cus_selective_product.get("system_code"):
+                if selective_product.get("systemCode") == cus_selective_product.get("systemCode"):
                     flag = True
                     if (cus_selective_product.get("count") < selective_product.get(
                             "minQuantity") or cus_selective_product.get("count") > selective_product.get(
