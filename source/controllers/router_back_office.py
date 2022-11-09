@@ -24,10 +24,13 @@ def add_product_to_basket(basket_id: int, product_type: str, system_code: str, q
     if not basket.check_storage(storage_id=storage_id):
         return {"success": False, "error": "انبار انتخاب شده با انبار سبد یکسان نیست", "status_code": 422}
     if not basket.is_exists_product(system_code):
-        return {"success": True, "message": "محصول با موفقیت اضافه شد", "status_code": 202} \
-            if basket.add_product_to_basket(system_code=system_code, product_type=product_type, quantity=quantity,
-                                            price=basket_price, min_quantity=min_quantity, max_quantity=max_quantity) \
-            else {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 417}
+        if basket.add_product_to_basket(system_code=system_code, product_type=product_type, quantity=quantity,
+                                        price=basket_price, min_quantity=min_quantity, max_quantity=max_quantity):
+            price = basket.get_price()
+            return {"success": True, "message": {"message": "محصول با موفقیت اضافه شد", "data": price},
+                    "status_code": 202}
+        else:
+            return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 417}
     return {"success": False, "error": "محصول در سبد موجود است", "status_code": 422}
 
 
@@ -52,7 +55,8 @@ def edit_basket_product(basket_id: int, system_code: str, quantity: int, storage
         return {"success": False, "error": "محصول در سبد موجود نیست", "status_code": 404}
     if basket.edit_product(system_code=system_code, quantity=quantity, price=basket_price, min_quantity=min_quantity,
                            max_quantity=max_quantity):
-        return {"success": True, "message": "محصول با موفقیت به روز شد", "status_code": 200}
+        price = basket.get_price()
+        return {"success": True, "message": {"message": "محصول با موفقیت به روز شد", "data": price}, "status_code": 200}
     return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
 
 
@@ -63,7 +67,8 @@ def delete_basket_product(basket_id: int, system_code: str, staff_user_id: int =
     if not basket.is_exists_product(system_code):
         return {"success": False, "error": "محصول در سبد موجود نیست", "status_code": 404}
     if basket.delete_product(system_code=system_code):
-        return {"success": True, "message": "محصول با موفقیت حذف شد", "status_code": 200}
+        price = basket.get_price()
+        return {"success": True, "message": {"message": "محصول با موفقیت حذف شد", "data": price}, "status_code": 200}
     return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
 
 
@@ -77,7 +82,9 @@ def complete_basket(basket_id: int, basket_start_date: str, basket_end_date: str
                 "status_code": 404}
     if basket.complete(basket_start_date=basket_start_date, basket_end_date=basket_end_date,
                        sales_per_day=sales_per_day, sales_number=sales_number, basket_status=basket_status):
-        return {"success": True, "message": "وضعیت سبد با موفقیت به تکمیل شده تغییر کرد", "status_code": 200}
+        price = basket.get_price()
+        return {"success": True, "message": {"message": "وضعیت سبد با موفقیت به تکمیل شده تغییر کرد", "data": price},
+                "status_code": 200}
     return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
 
 
@@ -122,5 +129,6 @@ def get_all_available_baskets_crm(data: str = None):
 def get_basket_by_id(basket_id: int):
     basket = Basket(basket_id=basket_id)
     if basket.is_basket_exists():
-        return {"success": True, "message": basket.get_basket(), "status_code": 200}
+        price = basket.get_price()
+        return {"success": True, "message": dict(basket.get_basket(), **price), "status_code": 200}
     return {"success": False, "error": "سبد مورد نظر موجود نیست ", "status_code": 404}

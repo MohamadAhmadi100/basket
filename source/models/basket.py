@@ -254,6 +254,83 @@ class Basket:
                 return bool(result.acknowledged)
         return
 
+    def get_price(self):
+        query_operator = {"basketId": self.basket_id}
+        with MongoConnection() as mongo:
+            result = mongo.basket.aggregate(
+                [
+                    {
+                        "$match": query_operator,
+                    },
+                    {
+                        "$project": {
+                            "mandatoryPrice": {
+                                '$reduce': {
+                                    'input': "$mandatoryProducts",
+                                    'initialValue': 0,
+                                    'in': {
+                                        "$add": ["$$value", {"$multiply": ["$$this.quantity", '$$this.basketPrice']}]
+                                    }
+                                }
+                            },
+                            "selectiveMinPrice": {
+                                '$reduce': {
+                                    'input': "$selectiveProducts",
+                                    'initialValue': 0,
+                                    'in': {
+                                        "$add": ["$$value", {"$multiply": ["$$this.minQuantity", '$$this.basketPrice']}]
+                                    }
+                                }
+                            },
+                            "optionalMinPrice": {
+                                '$reduce': {
+                                    'input': "$optionalProducts",
+                                    'initialValue': 0,
+                                    'in': {
+                                        "$add": ["$$value", {"$multiply": ["$$this.minQuantity", '$$this.basketPrice']}]
+                                    }
+                                }
+                            },
+                            "selectiveMaxPrice": {
+                                '$reduce': {
+                                    'input': "$selectiveProducts",
+                                    'initialValue': 0,
+                                    'in': {
+                                        "$add": ["$$value", {"$multiply": ["$$this.maxQuantity", '$$this.basketPrice']}]
+                                    }
+                                }
+                            },
+                            "optionalMaxPrice": {
+                                '$reduce': {
+                                    'input': "$optionalProducts",
+                                    'initialValue': 0,
+                                    'in': {
+                                        "$add": ["$$value", {"$multiply": ["$$this.maxQuantity", '$$this.basketPrice']}]
+                                    }
+                                }
+                            },
+                        }
+                    },
+                    {
+                        "$project": {
+                            "minBasketPrice": {
+                                "$add": ["$mandatoryPrice", "$selectiveMinPrice"]
+                            },
+                            "maxBasketPrice": {
+                                "$add": ["$mandatoryPrice", "$selectiveMaxPrice"]
+                            },
+                            "mandatoryPrice": 1,
+                            "selectiveMinPrice": 1,
+                            "optionalMinPrice": 1,
+                            "selectiveMaxPrice": 1,
+                            "optionalMaxPrice":1,
+                            "_id": 0
+                        }
+                    }
+                ]
+            )
+            return list(result)[0] or None
+
     def get_basket(self):
         query_operator = {"basketId": self.basket_id}
         projection_operator = {"_id": 0}
@@ -321,7 +398,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
@@ -363,7 +440,7 @@ class Basket:
                     flag = True
                     if (cus_selective_product.get("count") < selective_product.get(
                             "minQuantity") or cus_selective_product.get("count") > selective_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         return False
                     cus_selective_product["price"] = selective_product.get("basketPrice")
             if not flag:
@@ -381,7 +458,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
