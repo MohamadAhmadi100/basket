@@ -61,7 +61,11 @@ def checkout_check_basket(baskets: dict):
             for cus_basket in cus_baskets:
                 basket = Basket(basket_id=basket_id)
                 if not basket.is_salable_basket():
-                    continue
+                    failed_response.append({
+                        "name": str(basket_id),
+                        "status": "failed",
+                        "message": f"سبد با شناسه {basket_id} به دلیل اتمام موجودی حذف شد"
+                    })
                 if result := basket.checkout_products(
                         cus_mandatory_products=cus_basket.get("mandatory_products") or cus_basket.get(
                             "mandatoryProducts"),
