@@ -53,7 +53,7 @@ def checkout_check_basket(baskets: dict):
     for basket_id, cus_baskets in baskets.items():
         try:
             basket_id = int(basket_id)
-        except Exception:
+        except Exception as e:
             return {"success": False, "error": "سبد مورد نظر موجود نیست ...", "status_code": 404}
         if type(success_response.get(f"{basket_id}")) != list:
             success_response[f"{basket_id}"] = []

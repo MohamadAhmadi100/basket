@@ -27,11 +27,14 @@ class Filter:
             elif value.get("end"):
                 value["$gt"] = value.get("end")
                 del value["end"]
+            else:
+                continue
             period[filter_] = value
         return period
 
     def set_value_filters(self, values: dict) -> dict:
-        self.value_filters = {filter_: {"$in": value} for filter_, value in values.items() if filter_ in self.valid_value_filters and value and type(value) == list}
+        self.value_filters = {filter_: {"$in": value} for filter_, value in values.items() if
+                              filter_ in self.valid_value_filters and value and type(value) == list}
 
         return self.value_filters
 
