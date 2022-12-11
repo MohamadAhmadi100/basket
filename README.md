@@ -7,7 +7,7 @@
   </a>
 
 <h3 align="center">Basket Microservice</h3>
-
+  
   <p align="center">
     A microservice to handle products baskets!
     <br />
@@ -21,8 +21,8 @@
     <a href="https://gitlab.aasood.com/ecommerce/backend/basket/-/issues">Request Feature</a>
   </p>
 </div>
-
-
+ 
+ 
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
