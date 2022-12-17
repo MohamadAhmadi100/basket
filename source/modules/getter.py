@@ -1,4 +1,5 @@
 from source.helpers.connection import MongoConnection
+from source.models.basket import Basket
 
 
 class GetData:
@@ -16,14 +17,19 @@ class GetData:
         sort_type = self.handle_sort(sort_type)
         with MongoConnection() as mongo:
             try:
+                print(queries)
                 baskets = list(mongo.basket.find(
                     queries, {"_id": False, "basketJalaliCompleteTime": 0, "basketJalaliDeleteTime": 0}).limit(
                     int(number_of_records)).skip(
                     int(number_of_records) * (int(page) - 1)).sort(sort_name,
                                                                    sort_type))
                 total_count = mongo.basket.count_documents(queries)
+                result = []
+                for basket in baskets:
+                    basket_price = Basket(basket_id=basket.get("basketId")).get_price()
+                    result.append(dict(basket, **basket_price))
                 data = {
-                    "data": baskets,
+                    "data": result,
                     "totalCount": total_count,
                 }
                 return {"success": True, "message": data, "status_code": 200}
