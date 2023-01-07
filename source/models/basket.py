@@ -323,7 +323,7 @@ class Basket:
                             "selectiveMinPrice": 1,
                             "optionalMinPrice": 1,
                             "selectiveMaxPrice": 1,
-                            "optionalMaxPrice":1,
+                            "optionalMaxPrice": 1,
                             "_id": 0
                         }
                     }
@@ -391,14 +391,15 @@ class Basket:
             return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                     "selectiveProducts": cus_selective_products, "basketSalesNumber": result.get("basketSalesNumber"),
                     "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
-                    "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity")}
+                    "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"),
+                    "basketName": result.get("basketName")}
         removed = []
         for cus_optional_product in cus_optional_products:
             for optional_product in result.get("optionalProducts"):
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
@@ -406,12 +407,14 @@ class Basket:
                     "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
                     "basketSalesNumber": result.get("basketSalesNumber"),
                     "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
-                    "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"), "removed": removed}
+                    "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"), "removed": removed,
+                    "basketName": result.get("basketName")}
         return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                 "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
                 "basketSalesNumber": result.get("basketSalesNumber"),
                 "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
-                "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity")}
+                "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"),
+                "basketName": result.get("basketName")}
 
     def checkout_products(self, cus_mandatory_products: list, cus_selective_products: list,
                           cus_optional_products: list):
@@ -458,7 +461,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
