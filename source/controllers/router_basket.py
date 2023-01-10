@@ -47,18 +47,19 @@ def check_basket_is_valid(data: str):
     return {"success": False, "error": "سبد مورد نظر موجود نیست ..", "status_code": 404}
 
 
-def checkout_check_basket(baskets: dict):
+def checkout_check_basket(baskets: list):
     failed_response = []
     success_response = {}
-    for basket_id, cus_baskets in baskets.items():
+    for cus_baskets in baskets:
+        basket_id = cus_baskets.get("basketId")
         try:
             basket_id = int(basket_id)
         except Exception as e:
             return {"success": False, "error": "سبد مورد نظر موجود نیست ...", "status_code": 404}
         if type(success_response.get(f"{basket_id}")) != list:
             success_response[f"{basket_id}"] = []
-        if type(cus_baskets) == list:
-            for cus_basket in cus_baskets:
+        if type(cus_baskets) == dict:
+            for cus_basket in cus_baskets.get("baskets"):
                 basket = Basket(basket_id=basket_id)
                 if not basket.is_salable_basket():
                     failed_response.append({

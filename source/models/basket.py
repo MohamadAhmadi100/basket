@@ -399,7 +399,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
@@ -461,7 +461,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
