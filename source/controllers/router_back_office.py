@@ -7,8 +7,8 @@ from source.modules.getter import GetData
 
 def create_basket(basket_name: str, storage_id: str, staff_user_id: int = 20000):
     basket = Basket(basket_name=basket_name, storage_id=storage_id)
-    if basket.is_basket_name_exists():
-        return {"success": False, "error": "نام سبد تکراری است", "status_code": 422}
+    # if basket.is_basket_name_exists():
+    #     return {"success": False, "error": "نام سبد تکراری است", "status_code": 422}
     if basket_id := basket.save():
         log.save_create_log(basket_name=basket_name, staff_id=staff_user_id)
         return {"success": True, "message": "سید با موفقیت ایجاد شد", "data": {"basketId": basket_id},
