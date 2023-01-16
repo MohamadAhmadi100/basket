@@ -209,8 +209,7 @@ class Basket:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
                 return bool(result.get("basketStatus") in ["pend", "complete", "active"] and len(
-                    result.get("mandatoryProducts")) and len(
-                    result.get("selectiveProducts")) and basket_end_date >= jalali_datetime(
+                    result.get("mandatoryProducts")) and basket_end_date >= jalali_datetime(
                     datetime.now()) and result.get("minSelectiveProductsQuantity") and result.get(
                     "maxSelectiveProductsQuantity"))
 
