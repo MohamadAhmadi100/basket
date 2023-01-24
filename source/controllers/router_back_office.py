@@ -41,7 +41,7 @@ def set_selective_quantity_products(basket_id: int, min_products_quantity: int, 
         return {"success": False, "error": "سبد مورد نظر موجود نیست", "status_code": 404}
     if basket.set_selective_quantity(min_quantity=min_products_quantity, max_quantity=max_products_quantity):
         return {"success": True, "message": "اطلاعات با موفقیت ثبت شد", "status_code": 202}
-    return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
+    return {"success": False, "error": "محصول انتخابی در سبد موجود نیست", "status_code": 422}
 
 
 def edit_basket_product(basket_id: int, system_code: str, quantity: int, storage_id: str, basket_price: int,

@@ -104,6 +104,9 @@ class Basket:
             }
         }
         with MongoConnection() as mongo:
+            result = mongo.basket.find_one(query_operator, {"_id": 0})
+            if not result.get("selectiveProducts") or not len(result.get("selectiveProducts")):
+                return False
             if result := mongo.basket.update_one(
                     query_operator,
                     modify_operator,
@@ -210,9 +213,7 @@ class Basket:
                 result = mongo.basket.find_one(query_operator, projection_operator)
                 return bool(result.get("basketStatus") in ["pend", "complete", "active"] and len(
                     result.get("mandatoryProducts")) and basket_end_date >= jalali_datetime(
-                    datetime.now()) and result.get("minSelectiveProductsQuantity") and result.get(
-                    "maxSelectiveProductsQuantity"))
-
+                    datetime.now()))
             except Exception:
                 return False
 
@@ -398,7 +399,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
@@ -460,7 +461,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
