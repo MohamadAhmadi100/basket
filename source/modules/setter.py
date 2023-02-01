@@ -35,7 +35,6 @@ class Filter:
     def set_value_filters(self, values: dict) -> dict:
         self.value_filters = {filter_: {"$in": value} for filter_, value in values.items() if
                               filter_ in self.valid_value_filters and value and type(value) == list}
-
         return self.value_filters
 
     def set_search_query(self, search_phrase):
