@@ -364,7 +364,7 @@ class Basket:
             return False
         if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
                 len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
+            cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
@@ -426,8 +426,9 @@ class Basket:
                 return False
         if len(result.get("mandatoryProducts")) != len(cus_mandatory_products):
             return False
-        if len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-                cus_selective_products) > result.get("maxSelectiveProductsQuantity"):
+        if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
+                len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
+                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
