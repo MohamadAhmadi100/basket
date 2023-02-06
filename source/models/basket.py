@@ -346,11 +346,9 @@ class Basket:
         with MongoConnection() as mongo:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
-                return bool(result.get("basketStatus") == "active" and len(result.get("mandatoryProducts")) and len(
-                    result.get("selectiveProducts")) and result.get("basketJalaliEndDate") >= jalali_datetime(
-                    datetime.now()) and result.get("minSelectiveProductsQuantity") and result.get(
-                    "maxSelectiveProductsQuantity"))
-
+                return bool(
+                    result.get("basketStatus") == "active" and len(result.get("mandatoryProducts")) and result.get(
+                        "basketJalaliEndDate") >= jalali_datetime(datetime.now()))
             except Exception:
                 return False
 
@@ -364,8 +362,9 @@ class Basket:
                 return False
         if len(result.get("mandatoryProducts")) != len(cus_mandatory_products):
             return False
-        if len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-                cus_selective_products) > result.get("maxSelectiveProductsQuantity"):
+        if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
+                len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
+                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
