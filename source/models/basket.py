@@ -364,7 +364,7 @@ class Basket:
             return False
         if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
                 len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-            cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
+                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
@@ -379,7 +379,7 @@ class Basket:
                     flag = True
                     if (cus_selective_product.get("quantity") < selective_product.get(
                             "minQuantity") or cus_selective_product.get("quantity") > selective_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         return False
                     cus_selective_product["basketPrice"] = selective_product.get("basketPrice")
             if not flag:
@@ -389,7 +389,7 @@ class Basket:
         if not cus_optional_products:
             return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                     "selectiveProducts": cus_selective_products, "basketSalesNumber": result.get("basketSalesNumber"),
-                    "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
+                    "basketSalesPerDay": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
                     "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"),
                     "basketName": result.get("basketName")}
         removed = []
@@ -398,20 +398,20 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
             return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                     "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
                     "basketSalesNumber": result.get("basketSalesNumber"),
-                    "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
+                    "basketSalesPerDay": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
                     "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"), "removed": removed,
                     "basketName": result.get("basketName")}
         return {"basketId": result.get("basketId"), "mandatoryProducts": result.get("mandatoryProducts"),
                 "selectiveProducts": cus_selective_products, "optionalProducts": cus_optional_products,
                 "basketSalesNumber": result.get("basketSalesNumber"),
-                "basketSalesPer_day": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
+                "basketSalesPerDay": result.get("basketSalesPerDay"), "storageId": result.get("storageId"),
                 "minSelectiveProductsQuantity": result.get("minSelectiveProductsQuantity"),
                 "basketName": result.get("basketName")}
 
@@ -461,7 +461,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
