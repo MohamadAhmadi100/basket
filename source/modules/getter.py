@@ -27,6 +27,7 @@ class GetData:
                 result = []
                 for basket in baskets:
                     basket_price = Basket(basket_id=basket.get("basketId")).get_price()
+                    basket["basketStatus"] = basket.get("basketStatus") == "active"
                     result.append(dict(basket, **basket_price))
                 data = {
                     "data": result,

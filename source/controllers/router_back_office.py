@@ -111,7 +111,7 @@ def get_all_available_baskets_crm(data: str = None):
             search_query = records.set_search_query(search_phrase)
         filters = dict(period_filters, **value_filters, **search_query)
         if not data.get("sortType"):
-            sort_type = "asc"
+            sort_type = "desc"
         else:
             sort_type = "asc" if data.get("sortType") == "ascend" else "desc"
         sort_name = data.get("sortName") or "basketId"
