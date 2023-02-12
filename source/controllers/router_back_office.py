@@ -97,6 +97,24 @@ def delete_basket(basket_id: int, staff_user_id: int = 20000):
     return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
 
 
+def activate_basket(basket_id: int, staff_user_id: int = 20000):
+    basket = Basket(basket_id=basket_id)
+    if not basket.is_basket_exists():
+        return {"success": False, "error": "سبد مورد نظر موجود نیست", "status_code": 404}
+    if basket.activate():
+        return {"success": True, "message": "سبد با موفقیت فعال شد", "status_code": 200}
+    return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
+
+
+def deactivate_basket(basket_id: int, staff_user_id: int = 20000):
+    basket = Basket(basket_id=basket_id)
+    if not basket.is_basket_exists():
+        return {"success": False, "error": "سبد مورد نظر موجود نیست", "status_code": 404}
+    if basket.deactivate():
+        return {"success": True, "message": "سبد با موفقیت غیرفعال شد", "status_code": 200}
+    return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
+
+
 def get_all_available_baskets_crm(data: str = None):
     try:
         data = {} if data is None else json.loads(data)

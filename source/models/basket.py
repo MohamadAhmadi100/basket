@@ -254,6 +254,38 @@ class Basket:
                 return bool(result.acknowledged)
         return
 
+    def activate(self):
+        query_operator = {"basketId": self.basket_id}
+        modify_operator = {
+            "$set": {
+                "basketStatus": "active",
+                "basketJalaliActivateTime": jalali_datetime(datetime.now()),
+            }
+        }
+        with MongoConnection() as mongo:
+            if result := mongo.basket.update_one(
+                    query_operator,
+                    modify_operator,
+            ):
+                return bool(result.acknowledged)
+        return
+
+    def deactivate(self):
+        query_operator = {"basketId": self.basket_id}
+        modify_operator = {
+            "$set": {
+                "basketStatus": "pend",
+                "basketJalaliDeactivateTime": jalali_datetime(datetime.now()),
+            }
+        }
+        with MongoConnection() as mongo:
+            if result := mongo.basket.update_one(
+                    query_operator,
+                    modify_operator,
+            ):
+                return bool(result.acknowledged)
+        return
+
     def get_price(self):
         query_operator = {"basketId": self.basket_id}
         with MongoConnection() as mongo:
@@ -364,7 +396,7 @@ class Basket:
             return False
         if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
                 len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
+            cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
@@ -379,7 +411,7 @@ class Basket:
                     flag = True
                     if (cus_selective_product.get("quantity") < selective_product.get(
                             "minQuantity") or cus_selective_product.get("quantity") > selective_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         return False
                     cus_selective_product["basketPrice"] = selective_product.get("basketPrice")
             if not flag:
@@ -398,7 +430,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("systemCode"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("quantity") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                     cus_optional_product["basketPrice"] = optional_product.get("basketPrice")
         if len(removed):
@@ -428,7 +460,7 @@ class Basket:
             return False
         if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
                 len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
+            cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
@@ -461,7 +493,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
