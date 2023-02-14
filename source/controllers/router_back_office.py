@@ -147,6 +147,8 @@ def get_all_available_baskets_crm(data: str = None):
 def get_basket_by_id(basket_id: int):
     basket = Basket(basket_id=basket_id)
     if basket.is_basket_exists():
+        if not basket.is_complete_basket():
+            return {"success": False, "error": "برای ویرایش سبد ابتدا سبد را تکمیل کنید", "status_code": 404}
         price = basket.get_price()
         return {"success": True, "message": dict(basket.get_basket(), **price), "status_code": 200}
     return {"success": False, "error": "سبد مورد نظر موجود نیست ", "status_code": 404}

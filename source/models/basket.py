@@ -211,9 +211,21 @@ class Basket:
         with MongoConnection() as mongo:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
+                if len(result.get("selectiveProducts")) and not result.get("minSelectiveProductsQuantity"):
+                    return False
                 return bool(result.get("basketStatus") in ["pend", "complete", "active"] and len(
                     result.get("mandatoryProducts")) and basket_end_date >= jalali_datetime(
                     datetime.now()))
+            except Exception:
+                return False
+    def is_complete_basket(self):
+        query_operator = {"basketId": self.basket_id}
+        projection_operator = {"_id": 0}
+        with MongoConnection() as mongo:
+            try:
+                result = mongo.basket.find_one(query_operator, projection_operator)
+                return bool(result.get("basketStatus") in ["complete", "active"] and len(
+                    result.get("mandatoryProducts")))
             except Exception:
                 return False
 
@@ -396,7 +408,7 @@ class Basket:
             return False
         if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
                 len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-            cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
+                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
