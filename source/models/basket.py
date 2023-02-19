@@ -178,6 +178,24 @@ class Basket:
                 return bool(result.acknowledged)
         return
 
+    def change_basket_status_selective(self):
+        query_operator = {"basketId": self.basket_id}
+        modify_operator = {
+            "$set": {
+                "basketStatus": "pend"
+            }
+        }
+        with MongoConnection() as mongo:
+            result = mongo.basket.find_one(query_operator, {"_id": 0})
+            if not result.get("selectiveProducts") or not len(result.get("selectiveProducts")):
+                return False
+            if result := mongo.basket.update_one(
+                    query_operator,
+                    modify_operator,
+            ):
+                return bool(result.acknowledged)
+        return
+
     def delete_product(self, system_code: str):
         query_operator = {"basketId": self.basket_id}
         projection_operator = {"_id": 0}
@@ -218,6 +236,7 @@ class Basket:
                     datetime.now()))
             except Exception:
                 return False
+
     def is_complete_basket(self):
         query_operator = {"basketId": self.basket_id}
         projection_operator = {"_id": 0}
@@ -408,7 +427,7 @@ class Basket:
             return False
         if result.get("minSelectiveProductsQuantity") and result.get("maxSelectiveProductsQuantity") and (
                 len(cus_selective_products) < result.get("minSelectiveProductsQuantity") or len(
-                cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
+            cus_selective_products) > result.get("maxSelectiveProductsQuantity")):
             return False
         for mandatory_product in result.get("mandatoryProducts"):
             for cus_mandatory_product in cus_mandatory_products:
@@ -505,7 +524,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                        "maxQuantity")):
+                            "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
