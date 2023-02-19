@@ -109,7 +109,7 @@ def activate_basket(basket_id: int, staff_user_id: int = 20000):
         return {"success": False, "error": "سبد مورد نظر موجود نیست", "status_code": 404}
     if basket.activate():
         return {"success": True, "message": "سبد با موفقیت فعال شد", "status_code": 200}
-    return {"success": False, "error": "مشکلی رخ داد. لطفا مجددا تلاش کنید", "status_code": 422}
+    return {"success": False, "error": "ناموفق. لطفا اطلاعات سبد را مجددا بررسی و ویرایش کنید", "status_code": 422}
 
 
 def deactivate_basket(basket_id: int, staff_user_id: int = 20000):

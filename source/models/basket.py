@@ -243,7 +243,7 @@ class Basket:
         with MongoConnection() as mongo:
             try:
                 result = mongo.basket.find_one(query_operator, projection_operator)
-                return bool(result.get("basketStatus") in ["complete", "active"] and len(
+                return bool(result.get("basketStatus") in ["complete", "active", "pend"] and len(
                     result.get("mandatoryProducts")))
             except Exception:
                 return False
@@ -293,7 +293,12 @@ class Basket:
                 "basketJalaliActivateTime": jalali_datetime(datetime.now()),
             }
         }
+        projection_operator = {"_id": 0}
         with MongoConnection() as mongo:
+            result = mongo.basket.find_one(query_operator, projection_operator)
+            if (result.get("selectiveProducts") or len(result.get("selectiveProducts"))) and (
+                    not result.get("minSelectiveProductsQuantity") or not result.get("maxSelectiveProductsQuantity")):
+                return False
             if result := mongo.basket.update_one(
                     query_operator,
                     modify_operator,
@@ -524,7 +529,7 @@ class Basket:
                 if optional_product.get("systemCode") == cus_optional_product.get("system_code"):
                     if (cus_optional_product.get("quantity") < optional_product.get(
                             "minQuantity") or cus_optional_product.get("count") > optional_product.get(
-                            "maxQuantity")):
+                        "maxQuantity")):
                         removed.append(cus_optional_product)
                         flag = False
                     cus_optional_product["price"] = optional_product.get("basketPrice")
